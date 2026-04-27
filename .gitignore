@@ -32,6 +32,7 @@ models/*.engine
 data/*
 !data/videos/.gitkeep
 data/test_set/
+data/*.zip
 runs/
 outputs/
 
