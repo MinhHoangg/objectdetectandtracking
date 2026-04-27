@@ -29,7 +29,7 @@ Thumbs.db
 models/*.pt
 models/*.onnx
 models/*.engine
-data/videos/*
+data/*
 !data/videos/.gitkeep
 data/test_set/
 runs/
