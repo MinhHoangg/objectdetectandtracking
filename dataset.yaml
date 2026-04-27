@@ -1,0 +1,11 @@
+﻿# YOLO dataset config for the D-Fire fire/smoke dataset located at data/test_set.
+# Ultralytics derives label paths by replacing "/images/" with "/labels/" in each image path.
+# D-Fire uses class 0 = smoke, 1 = fire.
+
+path: data/test_set        # dataset root (relative to project root)
+train: train/images        # -> data/test_set/train/images  (labels: train/labels)
+val:   test/images         # -> data/test_set/test/images   (labels: test/labels)
+
+names:
+  0: smoke
+  1: fire

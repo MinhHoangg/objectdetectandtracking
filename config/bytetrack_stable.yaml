@@ -1,0 +1,10 @@
+# ByteTrack tuned for sparse / low-FPS CCTV-like footage.
+# Keeps tracks alive longer through occlusion to reduce ID switches.
+# Use with: --tracker-config config/bytetrack_stable.yaml
+tracker_type: bytetrack
+track_high_thresh: 0.25      # first-pass association threshold (lower = more lenient)
+track_low_thresh: 0.10       # second-pass for low-conf detections
+new_track_thresh: 0.30       # confidence required to spawn a brand-new ID
+track_buffer: 90             # frames a lost track is kept alive (default 30)
+match_thresh: 0.85           # IoU+motion match threshold (higher = stricter)
+fuse_score: True

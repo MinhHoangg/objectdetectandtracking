@@ -1,0 +1,39 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual envs
+.venv/
+venv/
+env/
+
+# uv
+.uv/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Models / data (large binary assets)
+models/*.pt
+models/*.onnx
+models/*.engine
+data/videos/*
+!data/videos/.gitkeep
+data/test_set/
+runs/
+outputs/
+
+# Logs
+*.log

@@ -1,0 +1,73 @@
+# System Overview
+- Purpose: Object detection + multi-object tracking on a video file or live camera. Pure perception layer; no UAV/control code (handled downstream by another component).
+- Tech stack: Python 3.10+, uv, Ultralytics YOLO (detector + ByteTrack/BoT-SORT tracker), OpenCV, Typer (CLI), Rich, NumPy.
+- High-level architecture: CLI -> JSON config -> Pipeline { FrameSource -> Detector(YOLO.track) -> Visualizer } -> window/MP4.
+
+# Directory Structure
+- /config: JSON runtime configuration (`default.json`) plus optional tracker yamls (`bytetrack_stable.yaml`, `botsort_stable.yaml`).
+- /data/videos: User-supplied test videos (git-ignored).
+- /models: User-supplied YOLO weights, e.g. `yolov12n.pt` (git-ignored).
+- /src/object_tracker: Importable package.
+- /src/object_tracker/sources: Frame producers (video file, camera).
+- /tests: Pytest smoke tests (no model download required).
+- /outputs: Annotated videos written when `--save` (git-ignored).
+
+# Key Flows
+- CLI `object-tracker run` -> load_config(JSON) -> apply CLI overrides -> Pipeline(cfg).run().
+- Pipeline.run: build_source(cfg) -> for each Frame: Detector.track(image) -> Visualizer.draw(frame, detections, hud) -> imshow / VideoWriter.
+- Source switch: `source.kind` ∈ {"video","camera"}; config holds both `source.video` and `source.camera` blocks side-by-side.
+
+# Modules
+## Module: object_tracker.config
+- Responsibility: Load JSON into typed dataclasses (`AppConfig`, `ModelConfig`, `TrackerConfig`, `SourceConfig` with nested `VideoSourceConfig` + `CameraSourceConfig`, `OutputConfig`).
+- Key files: `src/object_tracker/config.py`.
+- Dependencies: stdlib (`json`, `dataclasses`, `typing`).
+
+## Module: object_tracker.detector
+- Responsibility: Wrap `ultralytics.YOLO`. `Detector.track(image) -> list[Detection]` running detection + ByteTrack/BoT-SORT in one call (`YOLO.track(..., persist=True)`).
+- `Detection`: `track_id, class_id, class_name, confidence, bbox(xyxy)`; `.center`, `.area`.
+- Class filter: allow-list (`class_filter`) intersected with model's `names`, then drop any names in `exclude`. If both end up empty, falls back to no filter.
+- Tracker resolution: `tracker.config_path` (custom yaml file) takes precedence over `tracker.type` (`bytetrack`|`botsort`, mapped to bundled Ultralytics yaml).
+- Key files: `src/object_tracker/detector.py`.
+- Dependencies: ultralytics, numpy.
+
+## Module: object_tracker.sources
+- Responsibility: Iterable frame producers implementing `FrameSource` ABC yielding `Frame(index, image, timestamp_ms)`.
+- `VideoSource`: OpenCV file capture; raises if file missing.
+- `CameraSource`: OpenCV camera capture (uses `CAP_DSHOW` on Windows when available); tolerates transient read failures.
+- Key files: `src/object_tracker/sources/{base,video,camera}.py`.
+- Dependencies: opencv-python, numpy.
+
+## Module: object_tracker.visualizer
+- Responsibility: Draw bounding boxes, per-track colored labels, motion trails, and a HUD (FPS, frame index, detection count).
+- Track colors derived deterministically from `track_id` via integer hash.
+- Key files: `src/object_tracker/visualizer.py`.
+- Dependencies: opencv-python, numpy.
+
+## Module: object_tracker.pipeline
+- Responsibility: End-to-end loop. Builds source via `build_source(cfg)`, runs detector, draws via visualizer, optionally writes MP4 (`output.save`) and shows preview (`output.show`). Initial preview window sized to `output.window_width` x `output.window_height`. Quit on `q`/Esc OR when the preview window is closed via the OS 'X' button (detected via `cv2.WND_PROP_VISIBLE`).
+- Key files: `src/object_tracker/pipeline.py`.
+- Dependencies: opencv-python, internal modules.
+
+## Module: object_tracker.cli
+- Responsibility: Typer app with two commands:
+  - `run`: load config, apply CLI overrides (`--video/--camera/--weights/--device/--conf/--classes/--exclude/--tracker/--tracker-config/--save/--no-show/--log`), run pipeline.
+  - `info`: print resolved config.
+- Entry point: `object-tracker` script + `python -m object_tracker`.
+- Key files: `src/object_tracker/cli.py`, `src/object_tracker/__main__.py`.
+- Dependencies: typer, rich.
+
+# APIs
+- CLI: `object-tracker run [OPTIONS]`, `object-tracker info`.
+- Python: `object_tracker.config.load_config(path) -> AppConfig`; `object_tracker.pipeline.Pipeline(cfg).run()`; `object_tracker.detector.Detector(model_cfg, tracker_cfg, class_filter).track(image) -> list[Detection]`; `object_tracker.pipeline.build_source(cfg) -> FrameSource`.
+
+# Notes / Constraints
+- Config format: JSON only (`config/default.json`). No YAML dependency (pyyaml NOT installed).
+- Trackers: Ultralytics built-ins (`bytetrack`/`botsort`) by default. Project ships tuned profiles in `config/bytetrack_stable.yaml` and `config/botsort_stable.yaml` (longer `track_buffer=90`, looser thresholds, BoT-SORT with ReID) for ID-stable tracking on sparse/occluded footage — select via `tracker.config_path` or `--tracker-config`.
+- Class filter is by name (case-insensitive) and intersected with the loaded model's class set.
+- Default weights `models/yolo12n.pt` (Ultralytics-native YOLO12, downloadable from `https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo12n.pt`). Do NOT use `yolov12n.pt` from the sunsmarterjie/yolov12 "turbo" release — its `AAttn` checkpoint layout (`qk`+`v`) is incompatible with installed `ultralytics>=8.4` (which expects unified `qkv`) and fails with `AttributeError: 'AAttn' object has no attribute 'qkv'`.
+- Package name: `object_tracker` (do not reintroduce `uav_tracker`); UAV / follow-controller code is intentionally excluded — owned by another component.
+- Frames are BGR `np.ndarray` (OpenCV convention).
+- Detection logging: when `output.log_path` (or `--log PATH`) is set, pipeline appends JSONL records `{frame, ts_ms, track_id, class_id, class_name, confidence, bbox=[x1,y1,x2,y2]}` per detection per frame.
+- Windows: camera source prefers `CAP_DSHOW` for fast open.
+- Build: hatchling, package located at `src/object_tracker`.

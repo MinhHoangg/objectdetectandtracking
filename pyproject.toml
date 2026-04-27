@@ -1,0 +1,40 @@
+[project]
+name = "object-tracker"
+version = "0.1.0"
+description = "Object detection & tracking (YOLOv12 / Ultralytics + ByteTrack/BoT-SORT) on video files or live cameras."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "ObjectDetectAndTracking" }]
+license = { text = "MIT" }
+dependencies = [
+    "ultralytics>=8.3.0",
+    "opencv-python>=4.10.0",
+    "numpy>=1.26.0",
+    "typer>=0.12.0",
+    "rich>=13.7.0",
+]
+
+[project.optional-dependencies]
+gpu = [
+    "torch>=2.2.0",
+    "torchvision>=0.17.0",
+]
+directml = [
+    "torch-directml",
+]
+
+[project.scripts]
+object-tracker = "object_tracker.cli:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/object_tracker"]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=8.0.0",
+    "ruff>=0.6.0",
+]

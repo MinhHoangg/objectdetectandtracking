@@ -1,0 +1,41 @@
+{
+    "model": {
+        "weights": "models/yolo26n.pt",
+        "imgsz": 640,
+        "conf": 0.35,
+        "iou": 0.5,
+        "device": "",
+        "half": false
+    },
+    "classes": [
+        "person",
+        "fire",
+        "smoke"
+    ],
+    "exclude_classes": [],
+    "tracker": {
+        "type": "bytetrack",
+        "persist": true
+    },
+    "source": {
+        "kind": "video",
+        "video": {
+            "path": "data/videos/bucket11.mp4"
+        },
+        "camera": {
+            "index": 0,
+            "width": 1280,
+            "height": 720,
+            "fps": 30
+        }
+    },
+    "output": {
+        "show": true,
+        "save": false,
+        "save_dir": "outputs",
+        "draw_trails": true,
+        "trail_length": 30,
+        "window_width": 1280,
+        "window_height": 720
+    }
+}
