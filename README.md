@@ -1,9 +1,9 @@
 # Object Detection & Tracking
 
-A Python application that runs **YOLO (YOLOv12 or any Ultralytics-compatible
-model) + ByteTrack / BoT-SORT** on either a **video file** or a **live camera**,
-draws annotated boxes / IDs / motion trails, and (optionally) saves the result
-to disk.
+A Python application that runs **YOLO (YOLO26 / YOLOv12 / any
+Ultralytics-compatible model) + ByteTrack / BoT-SORT** on either a **video file**
+or a **live camera**, draws annotated boxes / IDs / motion trails, and
+(optionally) saves the result to disk.
 
 The codebase is intentionally focused on **detection + tracking only** — the
 downstream consumer (e.g. a UAV follow controller) is handled separately.
@@ -12,8 +12,10 @@ downstream consumer (e.g. a UAV follow controller) is handled separately.
 
 ## Features
 
-- 🔍 **Detection** with [Ultralytics](https://docs.ultralytics.com) YOLO models,
-  including [YOLOv12](https://github.com/sunsmarterjie/yolov12).
+- 🔍 **Detection** with [Ultralytics](https://docs.ultralytics.com) YOLO models —
+  recommended: [YOLO26](https://docs.ultralytics.com/models/yolo26/) (NMS-free,
+  edge-optimized, released Jan 2026); also works with
+  [YOLOv12](https://github.com/sunsmarterjie/yolov12), YOLO11, YOLOv8, etc.
 - 🎯 **Multi-object tracking** with ByteTrack or BoT-SORT (built into Ultralytics).
 - 🎥 **Two input modes**, switchable from the config or CLI:
   - **Video file** (`source.kind = "video"`)
@@ -454,6 +456,7 @@ uv run python -m object_tracker info
 ## Credits
 
 - [Ultralytics YOLO](https://github.com/ultralytics/ultralytics) — detection & tracking runtime.
+- [YOLO26](https://docs.ultralytics.com/models/yolo26/) — Ultralytics' latest NMS-free, edge-optimized YOLO (Jan 2026).
 - [YOLOv12 by sunsmarterjie](https://github.com/sunsmarterjie/yolov12) — model architecture & weights.
 - [OpenCV](https://opencv.org) — frame I/O and rendering.
 
