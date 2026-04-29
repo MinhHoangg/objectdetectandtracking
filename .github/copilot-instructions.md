@@ -11,49 +11,150 @@
 5. **For directory listings, use `rtk ls`** — not raw `ls` or `dir`.
 6. **Use Git Bash** as the default terminal on Windows for these commands.
 
+## Files
+
 ```bash
-# Instead of:              Use:
-cat file.py                rtk read subcategorize.py or rtk read nodes/subcategorize.py 
-head -50 file.py           rtk read file.py
-grep "pattern" .           rtk grep "pattern" .
-find . -name "*.py"        rtk find "*.py" .
-ls -la                     rtk ls .
-git status                 rtk git status
-git log -10                rtk git log -10
-cargo test                 rtk cargo test
-docker ps                  rtk docker ps
-kubectl get pods           rtk kubectl pods
+# Instead of:                       Use:
+cat file.py                         rtk read file.py
+head -50 file.py                    rtk read file.py
+tail -100 file.py                   rtk read file.py
+Get-Content file.py                 rtk read file.py
+# (signatures only, strip bodies)   rtk read file.py -l aggressive
+# (2-line heuristic code summary)   rtk smart file.py
+ls -la                              rtk ls .
+dir                                 rtk ls .
+find . -name "*.py"                 rtk find "*.py" .
+Get-ChildItem -Recurse              rtk find "*.py" .
+grep "pattern" .                    rtk grep "pattern" .
+rg "pattern"                        rtk grep "pattern" .
+Select-String "pattern"             rtk grep "pattern" .
+diff file1 file2                    rtk diff file1 file2
+```
+
+## Git
+
+```bash
+# Instead of:                       Use:
+git status                          rtk git status
+git log -n 10                       rtk git log -n 10
+git diff                            rtk git diff
+git add .                           rtk git add .                 # -> "ok"
+git commit -m "msg"                 rtk git commit -m "msg"       # -> "ok abc1234"
+git push                            rtk git push                  # -> "ok main"
+git pull                            rtk git pull                  # -> "ok 3 files +10 -2"
+```
+
+## GitHub CLI
+
+```bash
+# Instead of:                       Use:
+gh pr list                          rtk gh pr list
+gh pr view 42                       rtk gh pr view 42
+gh issue list                       rtk gh issue list
+gh run list                         rtk gh run list
+```
+
+## Test runners
+
+```bash
+# Instead of:                       Use:
+jest                                rtk jest                      # failures only
+vitest                              rtk vitest                    # failures only
+playwright test                     rtk playwright test
+pytest                              rtk pytest                    # -90%
+go test ./...                       rtk go test ./...
+cargo test                          rtk cargo test
+rake test                           rtk rake test
+rspec                               rtk rspec
+<any failing cmd>                   rtk err <cmd>                 # filter errors only
+<any test cmd>                      rtk test <cmd>                # generic, failures only
+```
+
+## Build & lint
+
+```bash
+# Instead of:                       Use:
+eslint .                            rtk lint
+biome check                         rtk lint biome
+tsc                                 rtk tsc
+next build                          rtk next build
+prettier --check .                  rtk prettier --check .
+cargo build                         rtk cargo build
+cargo clippy                        rtk cargo clippy
+ruff check                          rtk ruff check
+golangci-lint run                   rtk golangci-lint run
+rubocop                             rtk rubocop
+```
+
+## Package managers
+
+```bash
+# Instead of:                       Use:
+pnpm list                           rtk pnpm list
+pip list                            rtk pip list                  # auto-detect uv
+pip list --outdated                 rtk pip outdated
+bundle install                      rtk bundle install
+prisma generate                     rtk prisma generate
+```
+
+## AWS
+
+```bash
+# Instead of:                                  Use:
+aws sts get-caller-identity                    rtk aws sts get-caller-identity
+aws ec2 describe-instances                     rtk aws ec2 describe-instances
+aws lambda list-functions                      rtk aws lambda list-functions
+aws logs get-log-events ...                    rtk aws logs get-log-events ...
+aws cloudformation describe-stack-events ...   rtk aws cloudformation describe-stack-events ...
+aws dynamodb scan ...                          rtk aws dynamodb scan ...
+aws iam list-roles                             rtk aws iam list-roles
+aws s3 ls                                      rtk aws s3 ls
+```
+
+## Containers
+
+```bash
+# Instead of:                       Use:
+docker ps                           rtk docker ps
+docker images                       rtk docker images
+docker logs <container>             rtk docker logs <container>
+docker compose ps                   rtk docker compose ps
+kubectl get pods                    rtk kubectl pods
+kubectl logs <pod>                  rtk kubectl logs <pod>
+kubectl get services                rtk kubectl services
+```
+
+## Data & misc
+
+```bash
+# Instead of:                       Use:
+cat config.json                     rtk json config.json          # structure without values
+# (dependency summary)              rtk deps
+env | grep AWS                      rtk env -f AWS
+cat app.log                         rtk log app.log               # deduplicated
+curl <url>                          rtk curl <url>                # truncate + save full
+wget <url>                          rtk wget <url>
+<long verbose command>              rtk summary <cmd>             # heuristic summary
+<any command>                       rtk proxy <cmd>               # raw passthrough + tracking
 ```
 
 ## Meta commands (use directly)
 
 ```bash
-rtk gain              # Token savings dashboard
-rtk gain --history    # Per-command savings history
-rtk discover          # Find missed rtk opportunities
-rtk proxy <cmd>       # Run raw (no filtering) but track usage
+rtk gain                            # Token savings dashboard
+rtk gain --graph                    # ASCII graph (last 30 days)
+rtk gain --history                  # Per-command savings history
+rtk gain --daily                    # Day-by-day breakdown
+rtk gain --all --format json        # JSON export
+rtk discover                        # Find missed rtk opportunities
+rtk discover --all --since 7        # All projects, last 7 days
+rtk session                         # RTK adoption across recent sessions
+rtk proxy <cmd>                     # Run raw (no filtering) but track usage
 ```
 
-## Common commands
+## Global flags
 
 ```bash
-rtk ls .                        # Token-optimized directory tree
-rtk read file.rs                # Smart file reading (MUST use rtk for file reads!)
-rtk read file.rs -l aggressive  # Signatures only (strips bodies)
-rtk smart file.rs               # 2-line heuristic code summary
-rtk find "*.rs" .               # Compact find results
-rtk grep "pattern" .            # Grouped search results
-rtk diff file1 file2            # Condensed diff
-```
-
-## Git commands
-
-```bash
-rtk git status                  # Compact status
-rtk git log -n 10               # One-line commits
-rtk git diff                    # Condensed diff
-rtk git add                     # -> "ok"
-rtk git commit -m "msg"         # -> "ok abc1234"
-rtk git push                    # -> "ok main"
-rtk git pull                    # -> "ok" or summary
+-u, --ultra-compact                 # ASCII icons, inline format (extra savings)
+-v, --verbose                       # Increase verbosity (-v, -vv, -vvv)
 ```
