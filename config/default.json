@@ -15,7 +15,8 @@
     "exclude_classes": [],
     "tracker": {
         "type": "bytetrack",
-        "persist": true
+        "persist": true,
+        "config_path": "config/bytetrack_stable.yaml"
     },
     "source": {
         "kind": "video",

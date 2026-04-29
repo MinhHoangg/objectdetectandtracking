@@ -69,6 +69,13 @@ class Detector:
         else:
             self._class_ids = None
 
+        # Per-class contiguous remap of raw tracker IDs.
+        # ByteTrack/BoT-SORT increment a global counter even for tracks that
+        # never get confirmed, so the first surviving fire might be #2 or #7.
+        # We expose a clean per-class sequence (fire #1, #2, ... ; smoke #1, #2, ...).
+        self._id_remap: dict[tuple[int, int], int] = {}
+        self._next_display_id: dict[int, int] = {}
+
     @staticmethod
     def _resolve_tracker(tracker_cfg: TrackerConfig) -> str:
         # A custom yaml takes priority over the built-in name.
@@ -116,11 +123,22 @@ class Detector:
 
         out: list[Detection] = []
         for bb, cf, cl, tid in zip(xyxy, confs, clss, ids):
+            cls_int = int(cl)
+            display_id: int | None
+            if tid >= 0:
+                key = (cls_int, int(tid))
+                if key not in self._id_remap:
+                    nxt = self._next_display_id.get(cls_int, 0) + 1
+                    self._next_display_id[cls_int] = nxt
+                    self._id_remap[key] = nxt
+                display_id = self._id_remap[key]
+            else:
+                display_id = None
             out.append(
                 Detection(
-                    track_id=int(tid) if tid >= 0 else None,
-                    class_id=int(cl),
-                    class_name=self.names.get(int(cl), str(int(cl))),
+                    track_id=display_id,
+                    class_id=cls_int,
+                    class_name=self.names.get(cls_int, str(cls_int)),
                     confidence=float(cf),
                     bbox=(float(bb[0]), float(bb[1]), float(bb[2]), float(bb[3])),
                 )

@@ -1,10 +1,23 @@
-# ByteTrack tuned for sparse / low-FPS CCTV-like footage.
-# Keeps tracks alive longer through occlusion to reduce ID switches.
-# Use with: --tracker-config config/bytetrack_stable.yaml
+# ByteTrack tuned for MAX track-id stability on fire/smoke/person.
+# Goal: same physical object keeps the SAME id even through flicker,
+# brief occlusions, or detection dropouts.
 tracker_type: bytetrack
-track_high_thresh: 0.25      # first-pass association threshold (lower = more lenient)
-track_low_thresh: 0.10       # second-pass for low-conf detections
-new_track_thresh: 0.30       # confidence required to spawn a brand-new ID
-track_buffer: 90             # frames a lost track is kept alive (default 30)
-match_thresh: 0.85           # IoU+motion match threshold (higher = stricter)
+
+# 1st association: only "high confidence" detections feed strong matching.
+track_high_thresh: 0.20      # default 0.25; lower so flickering fire still feeds tracks
+
+# 2nd association: rescue low-conf detections (helps wispy smoke).
+track_low_thresh: 0.05       # default 0.1
+
+# Threshold to SPAWN a brand-new track id.
+# Raised so weak/transient detections don't open a fresh ID.
+new_track_thresh: 0.60       # default 0.25
+
+# How many frames a lost track is kept alive before being deleted.
+# 300 frames @ 25fps ~= 12s of occlusion tolerance.
+track_buffer: 300            # default 30
+
+# IoU distance threshold for matching. Higher = more lenient association.
+match_thresh: 0.95           # default 0.8
+
 fuse_score: True
