@@ -33,7 +33,7 @@ models/*.engine
 !data/videos/.gitkeep
 data/test_set/
 data/*.zip
-runs/
+# runs/
 outputs/
 
 # Logs
