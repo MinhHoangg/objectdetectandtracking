@@ -44,3 +44,16 @@ rtk smart file.rs               # 2-line heuristic code summary
 rtk find "*.rs" .               # Compact find results
 rtk grep "pattern" .            # Grouped search results
 rtk diff file1 file2            # Condensed diff
+```
+
+## Git commands
+
+```bash
+rtk git status                  # Compact status
+rtk git log -n 10               # One-line commits
+rtk git diff                    # Condensed diff
+rtk git add                     # -> "ok"
+rtk git commit -m "msg"         # -> "ok abc1234"
+rtk git push                    # -> "ok main"
+rtk git pull                    # -> "ok" or summary
+```
