@@ -26,10 +26,10 @@ dist/
 Thumbs.db
 
 # Models / data (large binary assets)
-models/*.pt
+# models/*.pt
 models/*.onnx
 models/*.engine
-data/*
+# data/*
 !data/videos/.gitkeep
 data/test_set/
 data/*.zip
