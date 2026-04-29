@@ -462,7 +462,7 @@ uv run python -m object_tracker info
 MIT.
 
 ## SAMPLE CLI COMMAND
-> uv run object-tracker run --video data/videos/bucket11.mp4 --classes all --exclude "bench,chair" --tracker-config config/bytetrack_stable.yaml
+> uv run object-tracker run --video data/videos/bucket11.mp4 --classes "fire" --exclude "bench,chair" --tracker-config config/bytetrack_stable.yaml
 
 ```powershell
 Copy-Item runs/train/fire-smoke-v1/weights/best.pt models/fire-smoke.pt

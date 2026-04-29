@@ -1,6 +1,6 @@
 {
     "model": {
-        "weights": "models/yolo26n.pt",
+        "weights": "models/best.pt",
         "imgsz": 640,
         "conf": 0.35,
         "iou": 0.5,
