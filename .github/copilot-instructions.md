@@ -13,7 +13,7 @@
 
 ```bash
 # Instead of:              Use:
-cat file.py                rtk read file.py
+cat file.py                rtk read subcategorize.py or rtk read nodes/subcategorize.py 
 head -50 file.py           rtk read file.py
 grep "pattern" .           rtk grep "pattern" .
 find . -name "*.py"        rtk find "*.py" .
